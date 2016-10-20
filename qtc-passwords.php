@@ -30,5 +30,5 @@ if ( ! class_exists( 'QTC_Passwords' ) ) {
 }
 
 if ( in_array( 'woo-flanny-conversion-tracker/woo-flanny-conversion-tracker.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
-	$QTC_Passwords = new QTC_Passwords();
+    $QTC_Passwords = new QTC_Passwords();
 }
