@@ -36,16 +36,30 @@ if ( ! class_exists( 'QTC_Passwords' ) ) {
 		} // END public static function activate
 
 		public function qtc_protect_page() {
+		    $found = 0;
+
+		    // Option to reset cookie for testing purposes primarily
+		    if ( isset( $_GET['qtc_reset_cookie'] ) ) {
+                setcookie( 'qtc_woo_tracking_password', '', time() - 3600, COOKIEPATH, COOKIE_DOMAIN );
+                setcookie( 'qtc_woo_tracking_code', '', time() - 3600, COOKIEPATH, COOKIE_DOMAIN );
+		    }
+
+            // Check for a submitted password
 		    if ( isset( $_POST['qtc_woo_tracking_password'] ) ) {
     			include( sprintf( "%s/control/qtc-password-manager.php", dirname( __FILE__ ) ) );
     			$found = count( QTC_Password_Manager::check_password( $_POST['qtc_woo_tracking_password'] ) );
-                if ( $found == 1 ) {
+
+    			// Was it found
+                if ( $found > 0 ) {
                 	setcookie( 'qtc_woo_tracking_password', sanitize_text_field( $_POST['qtc_woo_tracking_password'] ), time() + ( 3 * 86400 ), COOKIEPATH, COOKIE_DOMAIN );
                 	setcookie( 'qtc_woo_tracking_code', sanitize_text_field( $_POST['qtc_woo_tracking_password'] ), time() + ( 3 * 86400 ), COOKIEPATH, COOKIE_DOMAIN );
+                	echo '<p>cookie set</p>';
                 } else {
                     echo '<p>Password incorrect</p>';
                 }
-		    } elseif ( $this->is_woo() && ! isset( $_COOKIE['qtc_woo_tracking_password'] ) ) {
+		    }
+
+		    if ( $this->is_woo() && ! isset( $_COOKIE['qtc_woo_tracking_password'] ) && 0 == $found ) {
 		        echo '<form action="" method="POST">This page is password protected: <input type="password" name="qtc_woo_tracking_password" /> <input type="submit" value="Submit Password" /></form>';
 		        exit();
 		    }
