@@ -13,6 +13,7 @@ if ( ! class_exists( 'QTC_Passwords' ) ) {
     class QTC_Passwords {
         public function __construct() {
 			add_action( 'admin_menu', array( $this, 'qtc_admin_pages' ), 20 );
+			add_action( 'template_redirect', array( $this, 'qtc_protect_page' ) );
         }
 
 		/**
@@ -34,6 +35,22 @@ if ( ! class_exists( 'QTC_Passwords' ) ) {
 			dbDelta( $sql );
 		} // END public static function activate
 
+		public function qtc_protect_page() {
+		    if ( isset( $_POST['qtc_woo_tracking_password'] ) ) {
+    			include( sprintf( "%s/control/qtc-password-manager.php", dirname( __FILE__ ) ) );
+    			$found = count( QTC_Password_Manager::check_password( $_POST['qtc_woo_tracking_password'] ) );
+                if ( $found == 1 ) {
+                	setcookie( 'qtc_woo_tracking_password', sanitize_text_field( $_POST['qtc_woo_tracking_password'] ), time() + ( 3 * 86400 ), COOKIEPATH, COOKIE_DOMAIN );
+                	setcookie( 'qtc_woo_tracking_code', sanitize_text_field( $_POST['qtc_woo_tracking_password'] ), time() + ( 3 * 86400 ), COOKIEPATH, COOKIE_DOMAIN );
+                } else {
+                    echo '<p>Password incorrect</p>';
+                }
+		    } elseif ( $this->is_woo() && ! isset( $_COOKIE['qtc_woo_tracking_password'] ) ) {
+		        echo '<form action="" method="POST">This page is password protected: <input type="password" name="qtc_woo_tracking_password" /> <input type="submit" value="Submit Password" /></form>';
+		        exit();
+		    }
+		}
+
 		public function qtc_admin_pages() {
 			add_submenu_page( 'qtc-woo-page', 'Woo Conversion Passwords', 'Passwords', 'manage_options', 'qtc-woo-password-settings', array(
 				$this,
@@ -45,6 +62,14 @@ if ( ! class_exists( 'QTC_Passwords' ) ) {
 			//Include our settings page template
 			include( sprintf( "%s/control/qtc-password-manager.php", dirname( __FILE__ ) ) );
 			include( sprintf( "%s/views/qtc-password-page.php", dirname( __FILE__ ) ) );
+		}
+
+		private function is_woo() {
+		    if ( is_woocommerce() || is_shop() || is_product_category() || is_product_tag() || is_product() || is_cart() || is_checkout() || is_wc_endpoint_url() ) {
+		        return true;
+		    } else {
+		        return false;
+		    }
 		}
     }
 }

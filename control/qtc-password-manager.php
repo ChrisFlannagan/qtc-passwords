@@ -58,6 +58,10 @@ class QTC_Password_Manager {
 		// delete password from list
 	}
 
+	public static function check_password( $search = '' ) {
+		return self::get_passwords( 0, $search );
+	}
+
 	public static function display_passwords_list( $limit = 0, $search = '' ) {
 		$passwords = self::get_passwords( $limit, $search );
 		foreach ( $passwords as $password ) {
