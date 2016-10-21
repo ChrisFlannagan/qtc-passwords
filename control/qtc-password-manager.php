@@ -5,7 +5,7 @@
 
 if ( defined( ABSPATH ) ) { exit; }
 
-class QTC_Password_manager {
+class QTC_Password_Manager {
 	public static function create_password( $password ) {
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'qtc_passwords';
@@ -26,15 +26,14 @@ class QTC_Password_manager {
 	}
 
 	public static function get_passwords( $limit = 0 ) {
+		global $wpdb;
 		$table_name = $wpdb->prefix . 'qtc_passwords';
 		if ( intval( $limit ) > 0 ) {
 			$limit = ' LIMIT ' . intval( $limit );
 		} else {
 			$limit = '';
 		}
-		if( ! empty( $_POST['pid'] ) ) {
-			$table_name .= ' WHERE postid="' . intval( $_POST['pid'] ) . '" ';
-		}
+
 		$results = $wpdb->get_results(
 			"
 					SELECT *
@@ -43,5 +42,12 @@ class QTC_Password_manager {
 					"
 		);
 		return $results;
+	}
+
+	public static function display_passwords_list( $limit ) {
+		$passwords = self::get_passwords( $limit );
+		foreach ( $passwords as $password ) {
+			echo '<li>' . esc_html( $password->password ) . '</li>';
+		}
 	}
 }

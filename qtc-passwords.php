@@ -43,11 +43,13 @@ if ( ! class_exists( 'QTC_Passwords' ) ) {
 
 		public function password_page_settings() {
 			//Include our settings page template
+			include( sprintf( "%s/control/qtc-password-manager.php", dirname( __FILE__ ) ) );
 			include( sprintf( "%s/views/qtc-password-page.php", dirname( __FILE__ ) ) );
 		}
     }
 }
 
 if ( in_array( 'woo-flanny-conversion-tracker/woo-flanny-conversion-tracker.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
+	register_activation_hook( __FILE__, array( 'QTC_Passwords', 'activate' ) );
     $QTC_Passwords = new QTC_Passwords();
 }
